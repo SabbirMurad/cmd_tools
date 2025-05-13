@@ -3,6 +3,7 @@ use std::{env, fs, process};
 use std::path::Path;
 
 mod text;
+mod helper;
 
 const ARGS: [&str; 4] = [
     "-h",
@@ -104,7 +105,9 @@ fn main() {
         /*
             Writing to the javascript file
         */
-        if let Err(why) = js_file.write_all(b"Hello, world!") {
+        if let Err(why) = js_file.write_all(
+            text::component_js_content(component_name)
+        ) {
             println!("! {}", why);
             process::exit(0);
         };
@@ -122,9 +125,11 @@ fn main() {
         };
 
         /*
-            Writing to the javascript file
+            Writing to the css file
         */
-        if let Err(why) = css_file.write_all(b"Hello, world!") {
+        if let Err(why) = css_file.write_all(
+            text::component_css_content()
+        ) {
             println!("! {}", why);
             process::exit(0);
         };

@@ -1,3 +1,5 @@
+use create::helper;
+
 pub fn help(exc_name: &str) -> String {
   format!(r#"
 Available commands:
@@ -6,6 +8,8 @@ Available commands:
 🟢 -g / generate  --  Generate web components,
                       pass in the type and component name,
                       example: {} -g static my-component
+
+Visit https://sabbirhassan.com/documentation for more information
   "#, exc_name)
 }
 
@@ -51,38 +55,48 @@ format!(r#"
   "#, component_name)
 }
 
-// pub fn project_dir_required(command: &str) -> String {
-// format!(r#"
-// 🚫 Project directory is required
+pub fn component_css_content() -> String {
+format!(
+r#":host {
+    all: initial;
+    display: block;
+}"#)
+}
 
-// Example: clay {} <project directory>
-//   "#, command)
-// }
+pub fn component_js_content(component_name: &str) -> String {
+    let class_name = helper::dash_to_camel_case(component_name, true);
+    let export_name = helper::dash_to_camel_case(component_name, false);
 
-// pub fn project_dir_not_found(dir: &str) -> String {
-// format!(r#"
-// 🚫 Project directory not found
+format!(
+r#"class {class_name} extends HTMLElement {
+    constructor() {
+        super()
+        this.shadow = this.attachShadow({ mode: "closed" })
+        this.shadow.appendChild(this.#render())
+    }
+    
+    #render() {
+        let template = document.createElement("template")
+        template.innerHTML = /*html*/`
+            <link rel="stylesheet" href="/components/{component_name}/style.css">
+            <div class="spinner_box">
+                <svg class="spinner" viewBox="0 0 50 50">
+                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+                </svg>
+            </div>
+        `
+        return template.content
+    }
+}
 
-// The directory 📁 {} does not exist
-//   "#, dir)
-// }
-
-// pub fn project_dir_already_exists(dir: &str) -> String {
-// format!(r#"
-// 🚫 Project directory already exist
-
-// The directory 📁 {} already exist
-//   "#, dir)
-// }
-
-// pub fn clayignore() -> String {
-//   format!(r#".clayignore
-// .claywatch
-// map.db"#)
-// }
-
-// pub fn claywatch() -> String {
-//   format!(r#"assets/js
-// assets/css
-// map.db"#)
-// }
+export const {export_name} = {
+    mount: function () {
+        customElements.define("{component_name}", {class_name})
+    },
+    unmount: function (index) {
+        index
+        ? document.querySelectorAll("{component_name}")[index].remove()
+        : document.querySelector("{component_name}").remove()
+    },
+}"#)
+}
