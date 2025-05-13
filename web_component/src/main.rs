@@ -76,7 +76,7 @@ fn main() {
         /*
             Creating the component folder if not already exists, error if already exists
         */
-        let folder_name = format!("component/{}", component_name.clone());
+        let folder_name = format!("components/{}", component_name.clone());
         let component_folder = Path::new(&folder_name);
     
         if component_folder.exists() {
@@ -102,11 +102,22 @@ fn main() {
             },
         };
 
+        let component_type = match component_type.as_str() {
+            "-d" | "default" => text::ComponentType::Default,
+            "-e" | "event" => text::ComponentType::Event,
+            "-p" | "property" => text::ComponentType::Property,
+            "-a" | "attribute" => text::ComponentType::Attribute,
+            "-s" | "slot" => text::ComponentType::Slot,
+            _ => text::ComponentType::Default,
+        };
         /*
             Writing to the javascript file
         */
         if let Err(why) = js_file.write_all(
-            text::component_js_content(component_name)
+            text::component_js_content(
+                component_name,
+                component_type
+            ).as_bytes()
         ) {
             println!("! {}", why);
             process::exit(0);
@@ -128,12 +139,12 @@ fn main() {
             Writing to the css file
         */
         if let Err(why) = css_file.write_all(
-            text::component_css_content()
+            text::component_css_content().as_bytes()
         ) {
             println!("! {}", why);
             process::exit(0);
         };
 
-        println!("Hello, world!");
+        println!("Successfully generated!!!");
     }
 }
